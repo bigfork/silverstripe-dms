@@ -4,6 +4,7 @@ namespace Sunnysideup\DMS\Model;
 
 use Exception;
 
+use SilverStripe\TagField\TagField;
 use Sunnysideup\DMS\Model\DMSDocumentSet;
 use SilverStripe\Assets\File;
 use SilverStripe\Assets\Folder;
@@ -264,6 +265,12 @@ class DMSDocument extends File implements DMSDocumentInterface
                 $coverImageField->getValidator()->setAllowedExtensions(array('jpg', 'jpeg', 'png', 'gif'));
                 $coverImageField->setAllowedMaxFileNumber(1);
                 $fieldsForDetails[] = $coverImageField;
+
+                $fieldsForDetails[] = TagField::create(
+                    'Sets',
+                    'Document sets',
+                    DMSDocumentSet::get()
+                );
 
                 $gridFieldConfig = GridFieldConfig::create()->addComponents(
                     new GridFieldToolbarHeader(),
