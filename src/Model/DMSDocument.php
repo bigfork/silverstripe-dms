@@ -11,7 +11,6 @@ use SilverStripe\Assets\Folder;
 use SilverStripe\Assets\Image;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
-use Sunnysideup\DMS\Model\DMSDocument;
 use SilverStripe\Security\Group;
 use SilverStripe\Security\Permission;
 use SilverStripe\ORM\DB;
