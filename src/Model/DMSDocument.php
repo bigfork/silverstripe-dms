@@ -4,6 +4,7 @@ namespace Sunnysideup\DMS\Model;
 
 use Exception;
 
+use SilverStripe\CMS\Controllers\CMSMain;
 use SilverStripe\TagField\TagField;
 use Sunnysideup\DMS\Model\DMSDocumentSet;
 use SilverStripe\Assets\File;
@@ -760,122 +761,33 @@ class DMSDocument extends File implements DMSDocumentInterface
         return nl2br($this->getField('Description'));
     }
 
-    public function canView($member = null)
-    {
-        if (!$member || !(is_a($member, Member::class)) || is_numeric($member)) {
-            $member = Security::getCurrentUser();
-        }
-
-        // extended access checks
-        $results = $this->extend('canView', $member);
-
-        if ($results && is_array($results)) {
-            if (!min($results)) {
-                return false;
-            }
-        }
-
-        if (!$this->CanViewType || $this->CanViewType == 'Anyone') {
-            return true;
-        }
-        if ($member && Permission::checkMember($member, array(
-                'ADMIN',
-                'SITETREE_EDIT_ALL',
-                'SITETREE_VIEW_ALL',
-            ))
-        ) {
-            return true;
-        }
-
-        if ($this->CanViewType == 'LoggedInUsers') {
-            return $member && $member->exists();
-        }
-
-        if ($this->CanViewType == 'OnlyTheseUsers' && $this->ViewerGroups()->count()) {
-            return ($member && $member->inGroups($this->ViewerGroups()) || $this->canEdit($member));
-        }
-
-        return $this->canEdit($member);
-    }
-
-    public function canEdit($member = null)
-    {
-        if (!$member || !(is_a($member, Member::class)) || is_numeric($member)) {
-            $member = Security::getCurrentUser();
-        }
-
-        $results = $this->extend('canEdit', $member);
-
-        if ($results && is_array($results)) {
-            if (!min($results)) {
-                return false;
-            }
-        }
-
-        // Do early admin check
-        if ($member && Permission::checkMember($member, array('ADMIN','SITETREE_EDIT_ALL'))) {
-            return true;
-        }
-
-        if ($this->CanEditType === 'LoggedInUsers') {
-            return $member && $member->exists();
-        }
-
-        if ($this->CanEditType === 'OnlyTheseUsers' && $this->EditorGroups()->count()) {
-            return $member && $member->inGroups($this->EditorGroups());
-        }
-
-        return false;
-    }
-
-    /**
-     * @param Member $member
-     *
-     * @return boolean
-     */
     public function canCreate($member = null, $context = [])
     {
-        if (!$member || !(is_a($member, Member::class)) || is_numeric($member)) {
-            $member = Security::getCurrentUser();
-        }
-
-        $results = $this->extend('canCreate', $member);
-
-        if ($results && is_array($results)) {
-            if (!min($results)) {
-                return false;
-            }
-        }
-
-        // Do early admin check
-        if ($member &&
-            Permission::checkMember($member, array('CMS_ACCESS_Sunnysideup\DMS\Admin\DMSDocumentAdmin'))
-        ) {
-            return true;
-        }
-
         return $this->canEdit($member);
     }
 
     /**
+     * DataObject edit permissions
      * @param Member $member
-     *
+     * @return boolean
+     */
+    public function canEdit($member = null)
+    {
+        if (Controller::curr() instanceof CMSMain) {
+            return parent::canEdit($member);
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * see: https://github.com/silverstripe/silverstripe-framework/issues/9129
+     * DataObject delete permissions
+     * @param Member $member
      * @return boolean
      */
     public function canDelete($member = null)
     {
-        if (!$member || !(is_a($member, Member::class)) || is_numeric($member)) {
-            $member = Security::getCurrentUser();
-        }
-
-        $results = $this->extend('canDelete', $member);
-
-        if ($results && is_array($results)) {
-            if (!min($results)) {
-                return false;
-            }
-        }
-
         return $this->canEdit($member);
     }
 
