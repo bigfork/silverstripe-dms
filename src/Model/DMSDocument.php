@@ -4,6 +4,7 @@ namespace Sunnysideup\DMS\Model;
 
 use Exception;
 
+use SilverStripe\Admin\LeftAndMain;
 use SilverStripe\CMS\Controllers\CMSMain;
 use SilverStripe\TagField\TagField;
 use Sunnysideup\DMS\Model\DMSDocumentSet;
@@ -773,7 +774,7 @@ class DMSDocument extends File implements DMSDocumentInterface
      */
     public function canEdit($member = null)
     {
-        if (Controller::curr() instanceof CMSMain) {
+        if (Controller::curr() instanceof LeftAndMain) {
             return parent::canEdit($member);
         } else {
             return false;
